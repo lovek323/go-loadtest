@@ -1,21 +1,27 @@
 package loadtest
 
-import (
-	"time"
-)
+import "time"
 
 type Summary struct {
-	Taken time.Duration
+	Start time.Time
+	End   time.Time
 }
 
-func LoadTest(function func() error) (*Summary, error) {
-	start := time.Now()
-	if err := function(); err != nil {
-		return nil, err
+func LoadTest(function func() error, max int) (*Summary, error) {
+	start := now()
+	count := 0
+	for {
+		if err := function(); err != nil {
+			return nil, err
+		}
+		if count++; count > max {
+			break
+		}
 	}
-	taken := time.Since(start)
+	end := now()
 	summary := &Summary{
-		Taken: taken,
+		Start: start,
+		End:   end,
 	}
 	return summary, nil
 }
